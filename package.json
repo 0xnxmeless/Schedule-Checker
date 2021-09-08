@@ -4,13 +4,16 @@
   "description": "Crawls the McDonald's scheduling website for the new schedule each week.",
   "main": "src/index.js",
   "scripts": {
-    "start": "cd src; node .",
-    "dev": "cd src; nodemon ."
+    "start": "node .",
+    "dev": "nodemon ."
   },
   "keywords": [],
   "author": "Dom",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.984.0",
+    "axios": "^0.21.4",
+    "node-cron": "^3.0.0",
     "puppeteer": "^10.2.0"
   },
   "devDependencies": {
