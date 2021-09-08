@@ -85,5 +85,3 @@ const runTask = async () => {
 
 // Schedule a CRON job for every Thursday @ 7 PM
 cron.schedule("0 0 19 * * 4", runTask);
-
-runTask();
