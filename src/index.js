@@ -1,9 +1,7 @@
-require("dotenv").config({
-    path: ".\\.env",
-});
+require("dotenv").config();
 
 const puppeteer = require("puppeteer");
-const cron = require("node-cron");
+const { CronJob } = require("cron");
 const AWS = require("aws-sdk");
 const fs = require("fs");
 const axios = require("axios");
@@ -43,7 +41,7 @@ const uploadFile = (fileName) => new Promise((resolve, reject) => {
 const runTask = async () => {
     // Do the magic!
     log("Running task now!!!");
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: false,  });
     log("Launched browser");
     const page = await browser.newPage();
     log("Opened new page");
@@ -59,7 +57,7 @@ const runTask = async () => {
     // Wait for the schedule to load
     await page.waitForNavigation({ waitUntil: "networkidle0" });
     log("Page has loaded successfully");
-    await wait(4500);
+    await wait(30000);
     await page.mouse.move(474, 40);
     log("Moved mouse to 474, 90");
     await page.mouse.click(474, 90, {
@@ -69,10 +67,11 @@ const runTask = async () => {
     log("Clicked the \"Next\" button for next week's schedule");
     // I was stuck here for 2. Hours. I gave up and just decided to wait 7.5 seconds.
     // For reference - when the page loads, it doesn't include the schedule data..
-    // that is in a separate request. As a result: https://media.giphy.com/media/VapqUNCDqOuKQ/giphy.gif
-    await wait(7500);
+    // that is in a separate request, loaded in an iframe. 
+    // As a result: https://media.giphy.com/media/VapqUNCDqOuKQ/giphy.gif
+    await wait(25000);
     await page.screenshot({ path: "screenshot.png" });
-    log("Took a screenshot after waiting 7.5 seconds");
+    log("Took a screenshot after waiting 25 seconds");
     await browser.close();
     const location = await uploadFile("screenshot.png");
     log(`Successfully uploaded to ${location}.`);
@@ -80,8 +79,9 @@ const runTask = async () => {
     await axios.post(process.env.SCHEDULE_POSTING_WEBHOOK_URI, {
         content: `@everyone ${location}`,
     });
-    log("Sent webhook payload to Discord with schedule link");
 }
 
 // Schedule a CRON job for every Thursday @ 7 PM
-cron.schedule("0 0 19 * * 4", runTask);
+const job = new CronJob("0 0 19 * * 4", runTask, null, false, "Europe/London");
+
+job.start();
