@@ -41,7 +41,7 @@ const uploadFile = (fileName) => new Promise((resolve, reject) => {
 const runTask = async () => {
     // Do the magic!
     log("Running task now!!!");
-    const browser = await puppeteer.launch({ headless: false,  });
+    const browser = await puppeteer.launch({ args: ["--disable-dev-shm-usage"] });
     log("Launched browser");
     const page = await browser.newPage();
     log("Opened new page");
@@ -82,6 +82,7 @@ const runTask = async () => {
 }
 
 // Schedule a CRON job for every Thursday @ 7 PM
-const job = new CronJob("0 0 19 * * 4", runTask, null, false, "Europe/London");
+const job = new CronJob("0 32 1 * * 1", runTask, null, false, "Europe/London");
 
 job.start();
+log("Started schedule checker job");
